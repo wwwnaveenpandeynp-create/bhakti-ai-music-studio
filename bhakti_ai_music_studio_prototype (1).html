@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171326">
+<title>Bhakti AI Music Studio — Prototype</title>
+<style>
+:root{color-scheme:dark;--bg:#100d19;--panel:#211a30;--gold:#f2c66d;--muted:#b9aecb}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#171126,#0e0b15);font:16px system-ui,sans-serif;color:#fff}
+main{max-width:720px;margin:auto;padding:20px 16px 40px}
+header{padding:20px 4px}h1{margin:0;color:var(--gold);font-size:27px}p{color:var(--muted);line-height:1.5}
+.card{background:var(--panel);border:1px solid #3c304e;border-radius:18px;padding:17px;margin:14px 0}
+label,.heading{display:block;font-weight:650;margin:12px 0 8px}
+textarea,select,input{width:100%;padding:13px;border:1px solid #59496c;border-radius:12px;background:#15111f;color:#fff;font:inherit}
+textarea{min-height:145px;resize:vertical}
+.choices{display:flex;flex-wrap:wrap;gap:9px}.choice{border:1px solid #655276;border-radius:999px;padding:9px 13px;color:#eee;background:#171221}
+.choice:has(input:checked){border-color:var(--gold);background:#47351d;color:#ffe1a0}
+.choice input{width:auto;margin:0 5px 0 0;accent-color:#e9bb5f}
+button{width:100%;padding:15px;border:0;border-radius:13px;background:linear-gradient(90deg,#d99c3c,#f3d28a);color:#211607;font-weight:800;font-size:16px;margin-top:16px}
+#result{white-space:pre-wrap;background:#15111f;border-radius:12px;padding:13px;color:#f5dfb4;overflow-wrap:anywhere}
+small{color:var(--muted)}footer{font-size:12px;color:var(--muted);padding:8px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>♫ Bhakti AI Music Studio</h1>
+  <p>आपका निजी Lyrics-to-Song स्टूडियो · Prototype 1.0</p>
+</header>
+<section class="card">
+  <label for="lyrics">1. अपने गाने के Lyrics लिखें</label>
+  <textarea id="lyrics" placeholder="यहाँ अपने हिंदी / संस्कृत गीत के बोल डालें...">श्याम नाम से सुबह सँवरे
+वृंदावन की राह निहारे</textarea>
+  <label for="genre">2. संगीत का प्रकार</label>
+  <select id="genre">
+    <option>भक्ति भजन</option><option>आरती</option><option>मंत्र</option>
+    <option>शास्त्रीय संगीत</option><option>सूफी गीत</option><option>अन्य गीत</option>
+  </select>
+  <label>3. आवाज</label>
+  <div class="choices">
+    <label class="choice"><input type="radio" name="voice" value="पुरुष आवाज" checked>पुरुष</label>
+    <label class="choice"><input type="radio" name="voice" value="महिला आवाज">महिला</label>
+    <label class="choice"><input type="radio" name="voice" value="पुरुष और महिला युगल">युगल</label>
+  </div>
+  <label for="mood">4. गायन का अंदाज</label>
+  <select id="mood">
+    <option>मधुर और भक्तिमय</option><option>शक्तिशाली और भव्य</option>
+    <option>शांत और ध्यानपूर्ण</option><option>तेज और ऊर्जावान</option>
+  </select>
+  <label>5. वाद्य यंत्र</label>
+  <div class="choices" id="instruments">
+    <label class="choice"><input type="checkbox" value="बांसुरी" checked>बांसुरी</label>
+    <label class="choice"><input type="checkbox" value="तबला" checked>तबला</label>
+    <label class="choice"><input type="checkbox" value="हारमोनियम" checked>हारमोनियम</label>
+    <label class="choice"><input type="checkbox" value="ढोलक">ढोलक</label>
+    <label class="choice"><input type="checkbox" value="वीणा">वीणा</label>
+    <label class="choice"><input type="checkbox" value="मृदंग">मृदंग</label>
+  </div>
+  <label for="duration">6. गाने की अवधि</label>
+  <select id="duration"><option>1–2 मिनट</option><option>2–3 मिनट</option><option>3–4 मिनट</option></select>
+  <button id="make">मेरा Song Prompt तैयार करें</button>
+</section>
+<section class="card">
+  <div class="heading">आपका Generation Prompt</div>
+  <div id="result">ऊपर Lyrics और सेटिंग चुनकर बटन दबाएँ।</div>
+  <button id="copy" type="button">Prompt Copy करें</button>
+  <small>यह पहला इंटरफेस प्रोटोटाइप है। यह अभी ऑडियो नहीं बनाता; असली Music Engine/API जोड़ना अगला चरण है।</small>
+</section>
+<footer>Personal project · Bhakti AI Music Studio</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function build(){
+ const lyrics=$('lyrics').value.trim();
+ const voice=document.querySelector('input[name="voice"]:checked').value;
+ const instruments=[...document.querySelectorAll('#instruments input:checked')].map(x=>x.value);
+ const prompt=`Create an original ${$('genre').value} song using the exact Hindi/Sanskrit lyrics below.\\nVocal: ${voice}.\\nMood: ${$('mood').value}.\\nInstruments: ${instruments.join(', ')||'Choose suitable Indian instruments'}.\\nDuration target: ${$('duration').value}.\\nUse clear, natural Hindi pronunciation; sing every provided line without changing, omitting, or inventing lyrics. Add a short instrumental intro and a musically satisfying ending. Do not imitate any specific singer or copyrighted song.\\n\\nLYRICS:\\n${lyrics}`;
+ $('result').textContent=prompt;
+}
+$('make').addEventListener('click',build);
+$('copy').addEventListener('click',async()=>{
+ const text=$('result').textContent;
+ try{await navigator.clipboard.writeText(text);$('copy').textContent='कॉपी हो गया ✓';}
+ catch(e){const r=document.createRange();r.selectNodeContents($('result'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copy').textContent='टेक्स्ट चुन लिया — Copy करें';}
+});
+build();
+</script>
+</body></html>
